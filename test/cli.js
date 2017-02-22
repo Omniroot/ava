@@ -12,12 +12,15 @@ const proxyquire = require('proxyquire');
 const sinon = require('sinon');
 const uniqueTempDir = require('unique-temp-dir');
 const execa = require('execa');
+const colors = require('../lib/colors');
 
 const cliPath = path.join(__dirname, '../cli.js');
 
 // For some reason chalk is disabled by default
 chalk.enabled = true;
-const colors = require('../lib/colors');
+for (const key of Object.keys(colors)) {
+	colors[key].enabled = true;
+}
 
 function execCli(args, opts, cb) {
 	let dirname;
@@ -71,7 +74,7 @@ function execCli(args, opts, cb) {
 }
 
 test('disallow invalid babel config shortcuts', t => {
-	execCli('es2015.js', {dirname: 'fixture/invalid-babel-config'}, (err, stdout, stderr) => {
+	execCli(['--color', 'es2015.js'], {dirname: 'fixture/invalid-babel-config'}, (err, stdout, stderr) => {
 		t.ok(err);
 
 		let expectedOutput = '\n  ';
@@ -406,6 +409,20 @@ test('workers ensure test files load the same version of ava', t => {
 	const testFile = path.join(target, 'test.js');
 	execCli([testFile], {dirname: path.join('fixture', 'ava-paths', 'cwd')}, err => {
 		t.ifError(err);
+		t.end();
+	});
+});
+
+test('worker errors are treated as uncaught exceptions', t => {
+	execCli(['--no-color', '--verbose', 'test.js'], {dirname: 'fixture/trigger-worker-exception'}, (_, __, stderr) => {
+		t.match(stderr, /Forced error/);
+		t.end();
+	});
+});
+
+test('uncaught exceptions are raised for worker errors even if the error cannot be serialized', t => {
+	execCli(['--no-color', '--verbose', 'test-fallback.js'], {dirname: 'fixture/trigger-worker-exception'}, (_, __, stderr) => {
+		t.match(stderr, /Failed to serialize uncaught exception/);
 		t.end();
 	});
 });

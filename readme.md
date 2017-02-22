@@ -42,6 +42,7 @@ Translations: [Español](https://github.com/avajs/ava-docs/blob/master/es_ES/rea
 - Runs tests concurrently
 - Enforces writing atomic tests
 - No implicit globals
+- Includes TypeScript & Flow type definitions
 - [Magic assert](#magic-assert)
 - [Isolated environment for each test file](#process-isolation)
 - [Write your tests in ES2017](#es2017-support)
@@ -163,6 +164,7 @@ $ ava --help
     --verbose, -v           Enable verbose output
     --no-cache              Disable the transpiler cache
     --no-power-assert       Disable Power Assert
+    --no-color              Disable color output
     --match, -m             Only run tests with matching title (Can be repeated)
     --watch, -w             Re-run tests when tests and source files change
     --timeout, -T           Set global timeout
@@ -912,11 +914,15 @@ Assert that `value` is not equal to `expected`.
 
 ### `.deepEqual(value, expected, [message])`
 
-Assert that `value` is deep equal to `expected`.
+Assert that `value` is deep equal to `expected`. This is based on [Lodash' `isEqual()`](https://lodash.com/docs/4.17.4#isEqual):
+
+> Performs a deep comparison between two values to determine if they are equivalent.
+>
+> *Note*: This method supports comparing arrays, array buffers, booleans, date objects, error objects, maps, numbers, `Object` objects, regexes, sets, strings, symbols, and typed arrays. `Object` objects are compared by their own, not inherited, enumerable properties. Functions and DOM nodes are compared by strict equality, i.e. `===`.
 
 ### `.notDeepEqual(value, expected, [message])`
 
-Assert that `value` is not deep equal to `expected`.
+Assert that `value` is not deep equal to `expected`. The inverse of `.deepEqual()`.
 
 ### `.throws(function|promise, [error, [message]])`
 
